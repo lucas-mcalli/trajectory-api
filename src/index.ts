@@ -55,31 +55,60 @@ export default {
         "x-goog-api-key": env.GEMINI_API_KEY
       },
       body: JSON.stringify({
-        model: "gemini-3.5-flash",
-        input: `Extract booking details from this confirmation page text. Return ONLY a valid JSON object, no markdown, no explanation. Use null for any missing fields.
-          If this is a flight confirmation:
-          {
-            "type": "flight",
-            "origin": "IATA code",
-            "destination": "IATA code",
-            "airline": "airline name",
-            "flightNumber": "e.g. AA1234",
-            "departureTime": "ISO 8601 datetime",
-            "arrivalTime": "ISO 8601 datetime"
+        model: "gemini-3.1-flash-lite",
+        input: `Extract booking details from this confirmation page text into a structured JSON format. Fill any missing fields with appropriate default values. Return only the JSON object, no markdown, no explanation. Content: ${text}`,
+        response_format: {
+          type: "text",
+          mime_type: "application/json",
+          schema: {
+            type: "object",
+            properties: {
+              decision: {
+                anyOf: [
+                  {
+                    type: "object",
+                    title: "Flight",
+                    description: "Details for content marked as flight booking details",
+                    properties: {
+                      airline: { type: "string", description: "The name of the airline" },
+                      origin_airport: { type: "string", description: "The 3-letter IATA airport code for the departure airport (e.g., MIA)" },
+                      destination_airport: { type: "string", description: "The 3-letter IATA airport code for the arrival airport (e.g., LAX)" },
+                      departure_time: { type: "string", description: "The departure time, must be in ISO 8601 format" },
+                      arrival_time: { type: "string", description: "The arrival time, must be in ISO 8601 format" }
+                    },
+                    required: ["airline", "departure_time", "arrival_time"]
+                  },
+                  {
+                    type: "object",
+                    title: "Stay",
+                    description: "Details for content marked as hotel/stay booking details",
+                    properties: {
+                      name: { type: "string", description: "The name of the hotel/stay" },
+                      check_in_date: { 
+                        type: "string", 
+                        description: "The check-in date and time in ISO 8601 format (e.g., YYYY-MM-DDTHH:MM:SSZ)" 
+                      },
+                      check_out_date: { 
+                        type: "string", 
+                        description: "The check-out date and time in ISO 8601 format (e.g., YYYY-MM-DDTHH:MM:SSZ)" 
+                      },
+                      city: { 
+                        type: "string", 
+                        description: "The isolated city name where the hotel is located (e.g., Barcelona)" 
+                      },
+                      country: { 
+                        type: "string", 
+                        description: "The isolated country name where the hotel is located (e.g., Spain)" 
+                      }
+                    },
+                    required: ["name", "check_in_date", "check_out_date", "city", "country"]
+                  }
+                ]
+              }
+            },
+            required: ["decision"]
           }
-
-          If this is a hotel/accommodation confirmation:
-          {
-            "type": "stay",
-            "name": "property name",
-            "location": "city, country",
-            "checkIn": "ISO 8601 datetime",
-            "checkOut": "ISO 8601 datetime",
-            "guests": 1
-          }
-
-          Page text:
-          ${text}`
+        }
       })
     })
 
@@ -92,7 +121,8 @@ export default {
     }
     
     const data = await response.json() as any
-    const result = data.output_text || data.steps?.[0]?.content?.[0]?.text // path to the model response, straight from the Interactions API docs
+    console.log("Gemini API Response:", JSON.stringify(data));
+    const result = data.output_text || data.steps?.find((s: any) => s.type === "model_output")?.content?.[0]?.text
     return new Response(result.replace(/```json|```/g, "").trim(), { // this trims any leading or trailing whitespace and gets rid of the ai markdown that sometimes gets tacked on
       headers: {
         "Content-Type": "application/json",
