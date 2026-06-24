@@ -67,16 +67,25 @@ export default {
                 anyOf: [
                   {
                     type: "object",
-                    title: "Flight",
-                    description: "Details for content marked as flight booking details",
+                    title: "Flights",
+                    description: "Details for content containing one or more flight bookings (outbound, return, or connections)",
                     properties: {
-                      airline: { type: "string", description: "The name of the airline" },
-                      origin_airport: { type: "string", description: "The 3-letter IATA airport code for the departure airport (e.g., MIA)" },
-                      destination_airport: { type: "string", description: "The 3-letter IATA airport code for the arrival airport (e.g., LAX)" },
-                      departure_time: { type: "string", description: "The departure time, must be in ISO 8601 format" },
-                      arrival_time: { type: "string", description: "The arrival time, must be in ISO 8601 format" }
-                    },
-                    required: ["airline", "departure_time", "arrival_time"]
+                      flights: {
+                        type: "array",
+                        description: "List of all flights extracted from the confirmation text",
+                        items: {
+                          type: "object",
+                          properties: {
+                            airline: { type: "string", description: "The name of the airline" },
+                            origin_airport: { type: "string", description: "The 3-letter IATA airport code for the departure airport (e.g., MIA)" },
+                            destination_airport: { type: "string", description: "The 3-letter IATA airport code for the arrival airport (e.g., LAX)" },
+                            departure_time: { type: "string", description: "The departure time, must be in ISO 8601 format" },
+                            arrival_time: { type: "string", description: "The arrival time, must be in ISO 8601 format" }
+                          },
+                          required: ["airline", "departure_time", "arrival_time", "origin_airport", "destination_airport"]
+                        }
+                      }
+                    }
                   },
                   {
                     type: "object",
