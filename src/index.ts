@@ -55,7 +55,7 @@ export default {
         "x-goog-api-key": env.GEMINI_API_KEY
       },
       body: JSON.stringify({
-        model: "gemini-1.5-flash",
+        model: "gemini-3.5-flash",
         input: `Extract booking details from this confirmation page text. Return ONLY a valid JSON object, no markdown, no explanation. Use null for any missing fields.
           If this is a flight confirmation:
           {
@@ -85,7 +85,10 @@ export default {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Upstream Gemini API error (Status ${response.status}):`, errorText);
+      return new Response(
+        JSON.stringify({ error: "Gemini API error", details: errorText }),
+        { status: response.status, headers: { "Content-Type": "application/json" } }
+      )
     }
     
     const data = await response.json() as any
