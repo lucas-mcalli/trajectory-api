@@ -76,13 +76,13 @@ export default {
                         items: {
                           type: "object",
                           properties: {
+                            origin: { type: "string", description: "The 3-letter IATA airport code for the departure airport (e.g., MIA)" },
+                            destination: { type: "string", description: "The 3-letter IATA airport code for the arrival airport (e.g., LAX)" },
                             airline: { type: "string", description: "The name of the airline" },
-                            origin_airport: { type: "string", description: "The 3-letter IATA airport code for the departure airport (e.g., MIA)" },
-                            destination_airport: { type: "string", description: "The 3-letter IATA airport code for the arrival airport (e.g., LAX)" },
-                            departure_time: { type: "string", description: "The departure time, must be in ISO 8601 format" },
-                            arrival_time: { type: "string", description: "The arrival time, must be in ISO 8601 format" }
+                            departureTime: { type: "string", description: "The departure time, must be in ISO 8601 format" },
+                            arrivalTime: { type: "string", description: "The arrival time, must be in ISO 8601 format" },
                           },
-                          required: ["airline", "departure_time", "arrival_time", "origin_airport", "destination_airport"]
+                          required: ["airline", "departureTime", "arrivalTime", "origin", "destination"]
                         }
                       }
                     }
@@ -93,11 +93,11 @@ export default {
                     description: "Details for content marked as hotel/stay booking details",
                     properties: {
                       name: { type: "string", description: "The name of the hotel/stay" },
-                      check_in_date: { 
+                      checkIn: { 
                         type: "string", 
                         description: "The check-in date and time in ISO 8601 format (e.g., YYYY-MM-DDTHH:MM:SSZ)" 
                       },
-                      check_out_date: { 
+                      checkOut: { 
                         type: "string", 
                         description: "The check-out date and time in ISO 8601 format (e.g., YYYY-MM-DDTHH:MM:SSZ)" 
                       },
@@ -108,9 +108,9 @@ export default {
                       country: { 
                         type: "string", 
                         description: "The isolated country name where the hotel is located (e.g., Spain)" 
-                      }
+                      },
                     },
-                    required: ["name", "check_in_date", "check_out_date", "city", "country"]
+                    required: ["name", "checkIn", "checkOut", "city", "country"]
                   }
                 ]
               }
